@@ -3,15 +3,17 @@ namespace EsiniBulOyunu
     public partial class Form1 : Form
     {
         Random rnd = new Random();
-        int boyut = 10; //satýr ve sütun sayýsý
+        int boyut = 4; //satýr ve sütun sayýsý
         List<string> resimler = new List<string>();
         List<string> kartlar = new List<string>();
+        List<PictureBox> aciklar = new List<PictureBox>();
+        int yokedilenAdet = 0;
+
         public Form1()
         {
             ResimleriYukle();
             InitializeComponent();
-            KartlariSec();
-            KartlariDiz();
+
 
         }
 
@@ -33,12 +35,82 @@ namespace EsiniBulOyunu
                     resimKutusu.Size = new Size(gen, yuk);
                     resimKutusu.Left = x * (resimKutusu.Width + bosluk);
                     resimKutusu.Top = y * (resimKutusu.Height + bosluk);
-                    resimKutusu.ImageLocation = @"img\" + kartlar[i];
+                    resimKutusu.ImageLocation = "back.jpg";
                     resimKutusu.SizeMode = PictureBoxSizeMode.Zoom;
+                    resimKutusu.Click += ResimKutusu_Click;
                     pnlKartlar.Controls.Add(resimKutusu);
                     i++;
                 }
             }
+        }
+
+        private void ResimKutusu_Click(object? sender, EventArgs e)
+        {
+
+
+            if (aciklar.Count == 2)
+            {
+
+                AciklariKapat();
+            }
+
+            PictureBox tiklanan = (PictureBox)sender;
+            if (aciklar.Count == 1 && aciklar[0] == tiklanan)
+                return;
+
+            aciklar.Add(tiklanan);
+            int kartIndeks = (int)tiklanan.Tag;
+            string resim = kartlar[kartIndeks];
+            tiklanan.ImageLocation = "img\\" + resim;
+
+            if (aciklar.Count == 2 && (aciklar[0].ImageLocation == aciklar[1].ImageLocation))
+            {
+                Application.DoEvents();
+                AciklariGecikmeliYoket();
+                AciklariKapat();
+
+                //oyun bitti
+                if (yokedilenAdet == kartlar.Count)
+                {
+                    MessageBox.Show("oyun bitti");
+                    OyunuSifirla();
+                }
+
+            }
+
+        }
+
+        private void OyunuSifirla()
+        {
+
+
+            pnlKartlar.Controls.Clear();
+            yokedilenAdet = 0;
+            kartlar.Clear();
+            aciklar.Clear();
+            gboYeniOyun.Show();
+            pnlKartlar.BackColor = Color.Transparent;
+        }
+
+        private void AciklariGecikmeliYoket()
+        {
+            Thread.Sleep(500);
+            foreach (PictureBox kutu in aciklar)
+            {
+                pnlKartlar.Controls.Remove(kutu);
+                yokedilenAdet++;
+
+            }
+        }
+
+        private void AciklariKapat()
+        {
+            foreach (PictureBox kutu in aciklar)
+            {
+                kutu.ImageLocation = "back.jpg";
+
+            }
+            aciklar.Clear();
         }
 
         private void KartlariSec()
@@ -82,9 +154,54 @@ namespace EsiniBulOyunu
             }
         }
 
+
+        private void btnOyunuBaslat_Click(object sender, EventArgs e)
+        {
+            OyunuBaslat();
+        }
+
+        private void OyunuBaslat()
+        {
+            pnlKartlar.BackColor = Color.WhiteSmoke;
+            SeviyeyeKararVer();
+            gboYeniOyun.Hide();
+            KartlariSec();
+            KartlariDiz();
+        }
+
+        private void SeviyeyeKararVer()
+        {
+            if (rb1.Checked) boyut = 2;
+            else if (rb2.Checked) boyut = 4;
+            else if (rb3.Checked) boyut = 6;
+            else if (rb4.Checked) boyut = 8;
+            else boyut = 10;
+        }
+
+        //
         private void Form1_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void radioButton4_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void radioButton5_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnYeniOyun_Click(object sender, EventArgs e)
+        {
+            OyunuSifirla();
+        }
+
+        private void gboYeniOyun_Enter(object sender, EventArgs e)
+        {
+           
         }
     }
 }
